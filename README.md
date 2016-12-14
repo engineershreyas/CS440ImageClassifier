@@ -1,7 +1,7 @@
 Rutgers CS440: Image Classifier Project
 =======================================
 
-* Project described here [here](http://inst.eecs.berkeley.edu/~cs188/sp11/projects/classification/)
+* Project described [here](http://inst.eecs.berkeley.edu/~cs188/sp11/projects/classification/)
 
 ###Goals
 * Implement Image Classifiers
