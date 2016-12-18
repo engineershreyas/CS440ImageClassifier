@@ -6,7 +6,7 @@
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
-# This file contains feature extraction methods and harness 
+# This file contains feature extraction methods and harness
 # code for data classification
 
 import mostFrequent
@@ -60,18 +60,18 @@ def basicFeatureExtractorFace(datum):
 def enhancedFeatureExtractorDigit(datum):
   """
   Your feature extraction playground.
-  
+
   You should return a util.Counter() of features
   for this datum (datum is of type samples.Datum).
-  
+
   ## DESCRIBE YOUR ENHANCED FEATURES HERE...
-  
+
   ##
   """
   features =  basicFeatureExtractorDigit(datum)
 
   "*** YOUR CODE HERE ***"
-  
+
   return features
 
 
@@ -94,23 +94,23 @@ def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
   """
   This function is called after learning.
   Include any code that you want here to help you analyze your results.
-  
+
   Use the printImage(<list of pixels>) function to visualize features.
-  
+
   An example of use has been given to you.
-  
+
   - classifier is the trained classifier
   - guesses is the list of labels predicted by your classifier on the test set
   - testLabels is the list of true labels
   - testData is the list of training datapoints (as util.Counter of features)
   - rawTestData is the list of training datapoints (as samples.Datum)
-  - printImage is a method to visualize the features 
+  - printImage is a method to visualize the features
   (see its use in the odds ratio part in runClassifier method)
-  
+
   This code won't be evaluated. It is for your own optional use
   (and you can modify the signature if you want).
   """
-  
+
   # Put any code here...
   # Example of use:
   for i in range(len(guesses)):
@@ -118,7 +118,7 @@ def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
       truth = testLabels[i]
       if (prediction != truth):
           print "==================================="
-          print "Mistake on example %d" % i 
+          print "Mistake on example %d" % i
           print "Predicted %d; truth is %d" % (prediction, truth)
           print "Image: "
           print rawTestData[i]
@@ -137,18 +137,18 @@ class ImagePrinter:
 
     def printImage(self, pixels):
       """
-      Prints a Datum object that contains all pixels in the 
+      Prints a Datum object that contains all pixels in the
       provided list of pixels.  This will serve as a helper function
       to the analysis function you write.
-      
-      Pixels should take the form 
-      [(2,2), (2, 3), ...] 
+
+      Pixels should take the form
+      [(2,2), (2, 3), ...]
       where each tuple represents a pixel.
       """
       image = samples.Datum(None,self.width,self.height)
       for pix in pixels:
         try:
-            # This is so that new features that you could define which 
+            # This is so that new features that you could define which
             # which are not of the form of (x,y) will not break
             # this image printer...
             x,y = pix
@@ -156,16 +156,16 @@ class ImagePrinter:
         except:
             print "new features:", pix
             continue
-      print image  
+      print image
 
 def default(str):
   return str + ' [Default: %default]'
 
 def readCommand( argv ):
   "Processes the command used to run from the command line."
-  from optparse import OptionParser  
+  from optparse import OptionParser
   parser = OptionParser(USAGE_STRING)
-  
+
   parser.add_option('-c', '--classifier', help=default('The type of classifier'), choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira', 'minicontest'], default='mostFrequent')
   parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
   parser.add_option('-t', '--training', help=default('The size of the training set'), default=100, type="int")
@@ -182,7 +182,7 @@ def readCommand( argv ):
   options, otherjunk = parser.parse_args(argv)
   if len(otherjunk) != 0: raise Exception('Command line input not understood: ' + str(otherjunk))
   args = {}
-  
+
   # Set up variables according to the command line input.
   print "Doing classification"
   print "--------------------"
@@ -192,6 +192,10 @@ def readCommand( argv ):
     print "using enhanced features?:\t" + str(options.features)
   else:
     print "using minicontest feature extractor"
+  f = open('log.txt','a')
+  f.write('data: ' + options.data + ' ')
+  f.write('size: ' + str(options.training) + ' ')
+  f.close()
   print "training set size:\t" + str(options.training)
   if(options.data=="digits"):
     printImage = ImagePrinter(DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT).printImage
@@ -206,27 +210,27 @@ def readCommand( argv ):
     if (options.features):
       featureFunction = enhancedFeatureExtractorFace
     else:
-      featureFunction = basicFeatureExtractorFace      
+      featureFunction = basicFeatureExtractorFace
   else:
     print "Unknown dataset", options.data
     print USAGE_STRING
     sys.exit(2)
-    
+
   if(options.data=="digits"):
     legalLabels = range(10)
   else:
     legalLabels = range(2)
-    
+
   if options.training <= 0:
     print "Training set size should be a positive integer (you provided: %d)" % options.training
     print USAGE_STRING
     sys.exit(2)
-    
+
   if options.smoothing <= 0:
     print "Please provide a positive number for smoothing (you provided: %f)" % options.smoothing
     print USAGE_STRING
     sys.exit(2)
-    
+
   if options.odds:
     if options.label1 not in legalLabels or options.label2 not in legalLabels:
       print "Didn't provide a legal labels for the odds ratio: (%d,%d)" % (options.label1, options.label2)
@@ -258,13 +262,13 @@ def readCommand( argv ):
   else:
     print "Unknown classifier:", options.classifier
     print USAGE_STRING
-    
+
     sys.exit(2)
 
   args['classifier'] = classifier
   args['featureFunction'] = featureFunction
   args['printImage'] = printImage
-  
+
   return args, options
 
 USAGE_STRING = """
@@ -288,8 +292,8 @@ def runClassifier(args, options):
   featureFunction = args['featureFunction']
   classifier = args['classifier']
   printImage = args['printImage']
-      
-  # Load data  
+
+  # Load data
   numTraining = options.training
   numTest = options.test
 
@@ -307,14 +311,14 @@ def runClassifier(args, options):
     validationLabels = samples.loadLabelsFile("digitdata/validationlabels", numTest)
     rawTestData = samples.loadDataFile("digitdata/testimages", numTest,DIGIT_DATUM_WIDTH,DIGIT_DATUM_HEIGHT)
     testLabels = samples.loadLabelsFile("digitdata/testlabels", numTest)
-    
-  
+
+
   # Extract features
   print "Extracting features..."
   trainingData = map(featureFunction, rawTrainingData)
   validationData = map(featureFunction, rawValidationData)
   testData = map(featureFunction, rawTestData)
-  
+
   # Conduct training and testing
   print "Training..."
   start = time.time()
@@ -331,9 +335,12 @@ def runClassifier(args, options):
   correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
   print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels))
   analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
-
+  f = open('log.txt','a')
+  f.write("%0.3f second(s) " % ((end - start)))
+  f.write("Prediction Error: %d%%\n" % (100.0 - (100.0 * (float(correct) / float(len(testLabels))))))
+  f.close()
   print "Percent Prediction Error: %d%%" % (100.0 - (100.0 * (float(correct) / float(len(testLabels)))))
-  
+
   # do odds ratio computation if specified at command line
   if((options.odds) & (options.classifier == "naiveBayes" or (options.classifier == "nb")) ):
     label1, label2 = options.label1, options.label2
@@ -341,8 +348,8 @@ def runClassifier(args, options):
     if(options.classifier == "naiveBayes" or options.classifier == "nb"):
       string3 = "=== Features with highest odd ratio of label %d over label %d ===" % (label1, label2)
     else:
-      string3 = "=== Features for which weight(label %d)-weight(label %d) is biggest ===" % (label1, label2)    
-      
+      string3 = "=== Features for which weight(label %d)-weight(label %d) is biggest ===" % (label1, label2)
+
     print string3
     printImage(features_odds)
 
@@ -354,6 +361,6 @@ def runClassifier(args, options):
 
 if __name__ == '__main__':
   # Read input
-  args, options = readCommand( sys.argv[1:] ) 
+  args, options = readCommand( sys.argv[1:] )
   # Run classifier
   runClassifier(args, options)
