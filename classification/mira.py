@@ -8,7 +8,6 @@
 
 # Mira implementation
 
-import copy
 import util
 PRINT = True
 
@@ -72,6 +71,8 @@ class MiraClassifier:
                 if predicted_label == label:
                     continue
 
+                # tau = ((w_y' - w_y) * f + 1) / (2 * ||f||^2)
+                # ||f|| = sqrt(sum((f_i,j)^2 for every feature)), ||f||^2 cancels sqrt
                 tau = (((self.weights[predicted_label] - self.weights[label]) * datum) + 1.0) / (2 * sum([val * val for val in datum.values()]))
                 tau = min(c, tau)
 
