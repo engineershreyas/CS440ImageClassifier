@@ -1,8 +1,13 @@
 import os
 
 classifiers = ["naiveBayes","perceptron","mira"]
-
+#overrite existing log.txt
+f = open('log.txt','w')
+f.close()
 for c in classifiers:
+    f = open('log.txt','a')
+    f.write(c + " ")
+    f.close()
     callBasedOnClassifier(c)
 
 def callBasedOnClassifier(classifier):
