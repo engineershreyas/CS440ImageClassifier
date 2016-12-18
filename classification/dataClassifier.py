@@ -15,6 +15,7 @@ import perceptron
 import mira
 import samples
 import sys
+import time
 import util
 
 TEST_SET_SIZE = 100
@@ -316,7 +317,11 @@ def runClassifier(args, options):
   
   # Conduct training and testing
   print "Training..."
+  start = time.time()
   classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+  end = time.time()
+  print "Training completed in %0.3f second(s)" % ((end - start))
+
   print "Validating..."
   guesses = classifier.classify(validationData)
   correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
@@ -326,6 +331,8 @@ def runClassifier(args, options):
   correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
   print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels))
   analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
+
+  print "Percent Prediction Error: %d%%" % (100.0 - (100.0 * (float(correct) / float(len(testLabels)))))
   
   # do odds ratio computation if specified at command line
   if((options.odds) & (options.classifier == "naiveBayes" or (options.classifier == "nb")) ):

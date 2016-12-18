@@ -7,6 +7,8 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
 # Mira implementation
+
+import copy
 import util
 PRINT = True
 
@@ -54,8 +56,46 @@ class MiraClassifier:
     datum is a counter from features to values for those features
     representing a vector of values.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    best_weights = {}
+    best_c = -1
+    best_accuracy = -1
+    for c in Cgrid:
+        self.initializeWeightsToZero()
+
+        for i in range(self.max_iterations):
+            for j in range(len(trainingData)):
+                datum = trainingData[j]
+                label = trainingLabels[j]
+                predicted_label = self.classify([datum])[0]
+
+                if predicted_label == label:
+                    continue
+
+                tau = (((self.weights[predicted_label] - self.weights[label]) * datum) + 1.0) / (2 * sum([val * val for val in datum.values()]))
+                tau = min(c, tau)
+
+                delta = datum.copy()
+                for feature in datum.keys():
+                    delta[feature] *= tau
+
+                for feature in delta.keys():
+                    self.weights[label][feature] += delta[feature]
+                    self.weights[predicted_label][feature] -= delta[feature]
+
+        predictions = self.classify(validationData)
+        accuracy = 0
+        for i in range(len(predictions)):
+            if predictions[i] == validationLabels[i]:
+                accuracy += 1
+
+        if accuracy > best_accuracy:
+            best_weights = self.weights.copy()
+            best_c = c
+            best_accuracy = accuracy
+
+    self.C = best_c
+    self.weights = best_weights
 
   def classify(self, data ):
     """
@@ -81,7 +121,9 @@ class MiraClassifier:
     """
     featuresOdds = []
 
-    "*** YOUR CODE HERE ***"
+    for feature in self.features:
+        featuresOdds.append((self.weights[label1][feature] - self.weights[label2][feature], feature))
 
-    return featuresOdds
-
+    featuresOdds = sorted(featuresOdds, key = lambda x: x[0], reverse = True)[:100]
+       
+    return list(map(lambda x: x[1], featuresOdds))

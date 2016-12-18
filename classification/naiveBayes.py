@@ -22,6 +22,8 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     self.type = "naivebayes"
     self.k = 1 # this is the smoothing parameter, ** use it in your train method **
     self.automaticTuning = False # Look at this flag to decide whether to choose k automatically ** use this in your train method **
+    self._probs = {}    # Conditional probabilities
+    self._p = None      # Prior distribution
     
   def setSmoothing(self, k):
     """
@@ -60,8 +62,46 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     self.legalLabels.
     """
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    n = len(trainingData)
+
+    counts = util.Counter()
+    for label in trainingLabels:
+        counts[label] += 1.0
+
+    self._p = self._normalize(counts, sum(counts.values()))
+
+    counts = {}
+    for feature in self.features:
+        counts[feature] = {}
+        for label in self.legalLabels:
+            counts[feature][label] = {
+                0: 0,
+                1: 0
+            }
+
+    for i in range(n):
+        datum = trainingData[i]
+        label = trainingLabels[i]
+
+        for (feature, val) in datum.items():
+            counts[feature][label][val] += 1.0
+
+    best_k = -1
+    best_accuracy = -1
+    for k in kgrid:
+        self._probs = self._calculate_cond_probs(counts, k)
+        predictions = self.classify(validationData)
+
+        accuracy = 0
+        for i in range(len(predictions)):
+            if predictions[i] == validationLabels[i]:
+                accuracy += 1
+ 
+        if accuracy > best_accuracy:
+            best_k = k
+            best_accuracy = accuracy
+
+    self._probs = self._calculate_cond_probs(counts, best_k)
         
   def classify(self, testData):
     """
@@ -87,10 +127,14 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     self.legalLabels.
     """
     logJoint = util.Counter()
-    
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    
+
+    for label in self.legalLabels:
+        logJoint[label] = math.log(self._p[label])
+
+        for (feature, val) in datum.items():
+            p = self._probs[feature][label][val];
+            logJoint[label] += math.log(p)
+
     return logJoint
   
   def findHighOddsFeatures(self, label1, label2):
@@ -101,12 +145,41 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     Note: you may find 'self.features' a useful way to loop through all possible features
     """
     featuresOdds = []
+
+    for feature in self.features:
+        featuresOdds.append((self._probs[feature][label1][1] / self._probs[feature][label2][1], feature))
+
+    featuresOdds = sorted(featuresOdds, key = lambda x: x[0], reverse = True)[:100]
        
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return list(map(lambda x: x[1], featuresOdds))
 
-    return featuresOdds
-    
+  def _calculate_cond_probs(self, counts, k):
+    ret = {}
+    for (feature, labels) in counts.items():
+        ret[feature] = {}
+        for (label, vals) in labels.items():
+            ret[feature][label] = {}
 
-    
-      
+            total = sum(counts[feature][label].values()) + k + k
+            for (val, count) in vals.items():
+                ret[feature][label][val] = (counts[feature][label][val] + k) / total
+
+    return ret
+
+  def _normalize(self, counts, total):
+    """
+    Normalizes the counts probability distribution such that
+    the summation of all the probabilities sum up to one.
+
+    param   counts: distribution to normalize
+    param   total: dict or number to use to normalize
+
+    returns:    normalized probability distribution
+    """
+
+    ret = counts
+
+    for (k, count) in counts.items():
+        ret[k] = count / total
+
+    return ret
