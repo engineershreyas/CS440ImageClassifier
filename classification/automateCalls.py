@@ -26,9 +26,9 @@ def doCalls(classifier):
     command = "python dataClassifier.py -c" + classifier + " -f -d faces -t 451"
     os.system(command)
 
-#classifiers = ["naiveBayes","perceptron","mira"]
-classifiers = ["mira"]
-#overrite existing log.txt
+classifiers = ["naiveBayes","perceptron","mira"]
+
+#overwrite existing log.txt
 f = open('log.txt','w')
 f.close()
 for c in classifiers:
