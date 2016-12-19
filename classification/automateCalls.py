@@ -1,15 +1,5 @@
 import os
 
-classifiers = ["naiveBayes","perceptron","mira"]
-#overrite existing log.txt
-f = open('log.txt','w')
-f.close()
-for c in classifiers:
-    f = open('log.txt','a')
-    f.write(c + " ")
-    f.close()
-    callBasedOnClassifier(c)
-
 def callBasedOnClassifier(classifier):
     if classifier == "mira" or classifier == "naiveBayes":
         classifier = classifier + " -a"
@@ -35,3 +25,14 @@ def doCalls(classifier):
         y = y + 45
     command = "python dataClassifier.py -c" + classifier + " -f -d faces -t 451"
     os.system(command)
+
+#classifiers = ["naiveBayes","perceptron","mira"]
+classifiers = ["mira"]
+#overrite existing log.txt
+f = open('log.txt','w')
+f.close()
+for c in classifiers:
+    f = open('log.txt','a')
+    f.write(c + " ")
+    f.close()
+    callBasedOnClassifier(c)

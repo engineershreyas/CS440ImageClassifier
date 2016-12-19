@@ -56,35 +56,47 @@ class MiraClassifier:
     representing a vector of values.
     """
 
+    # Try every constant C value to see which
+    # yields the most accurate results
     best_weights = {}
-    best_c = -1
     best_accuracy = -1
     for c in Cgrid:
         self.initializeWeightsToZero()
 
+        # Run training data set for each iteration
         for i in range(self.max_iterations):
             for j in range(len(trainingData)):
                 datum = trainingData[j]
                 label = trainingLabels[j]
                 predicted_label = self.classify([datum])[0]
 
+                # Nothing to update if predicted correctly
                 if predicted_label == label:
                     continue
 
                 # tau = ((w_y' - w_y) * f + 1) / (2 * ||f||^2)
                 # ||f|| = sqrt(sum((f_i,j)^2 for every feature)), ||f||^2 cancels sqrt
-                tau = (((self.weights[predicted_label] - self.weights[label]) * datum) + 1.0) / (2 * sum([val * val for val in datum.values()]))
+
+                tau = 0.0
+                for feature in self.weights[predicted_label].keys():
+                    tau += (self.weights[predicted_label][feature] - self.weights[label][feature]) * datum[feature]
+                
+                tau += 1.0 / (2 * sum([val * val for val in datum.values()]))
+                #tau = (((self.weights[predicted_label] - self.weights[label]) * datum) + 1.0) / (2 * sum([val * val for val in datum.values()]))
                 tau = min(c, tau)
 
                 delta = datum.copy()
                 for feature in datum.keys():
                     delta[feature] *= tau
 
+                # Update weights
                 for feature in delta.keys():
                     self.weights[label][feature] += delta[feature]
                     self.weights[predicted_label][feature] -= delta[feature]
 
         predictions = self.classify(validationData)
+        
+        # Count number of correct predictions
         accuracy = 0
         for i in range(len(predictions)):
             if predictions[i] == validationLabels[i]:
@@ -92,10 +104,10 @@ class MiraClassifier:
 
         if accuracy > best_accuracy:
             best_weights = self.weights.copy()
-            best_c = c
             best_accuracy = accuracy
 
-    self.C = best_c
+    # Use the vector of weights that yielded
+    # the most accurate results
     self.weights = best_weights
 
   def classify(self, data ):
