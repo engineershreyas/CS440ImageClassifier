@@ -68,6 +68,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     for label in trainingLabels:
         counts[label] += 1.0
 
+    # P(Y)
     self._p = self._normalize(counts, sum(counts.values()))
 
     counts = {}
@@ -86,17 +87,22 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         for (feature, val) in datum.items():
             counts[feature][label][val] += 1.0
 
+    # Try all the k smoothing values in kgrid to see
+    # which yields the most accurate results
     best_k = -1
     best_accuracy = -1
     for k in kgrid:
         self._probs = self._calculate_cond_probs(counts, k)
         predictions = self.classify(validationData)
 
+        # Count number of correct predictions
         accuracy = 0
         for i in range(len(predictions)):
             if predictions[i] == validationLabels[i]:
                 accuracy += 1
  
+        # Determine the k value that yields the most accurate results based on
+        # the validation data
         if accuracy > best_accuracy:
             best_k = k
             best_accuracy = accuracy
@@ -154,6 +160,9 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     return list(map(lambda x: x[1], featuresOdds))
 
   def _calculate_cond_probs(self, counts, k):
+    """
+    Returns calculateed conditional probabilties, P(F | Y), for every feature and label
+    """
     ret = {}
     for (feature, labels) in counts.items():
         ret[feature] = {}
