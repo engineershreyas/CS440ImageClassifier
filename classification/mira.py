@@ -76,13 +76,11 @@ class MiraClassifier:
 
                 # tau = ((w_y' - w_y) * f + 1) / (2 * ||f||^2)
                 # ||f|| = sqrt(sum((f_i,j)^2 for every feature)), ||f||^2 cancels sqrt
-
                 tau = 1.0
-                for feature in self.weights[predicted_label].keys():
+                for feature in datum.keys():
                     tau += (self.weights[predicted_label][feature] - self.weights[label][feature]) * datum[feature]
                 
                 tau /= (2 * sum([val * val for val in datum.values()]))
-                #tau = (((self.weights[predicted_label] - self.weights[label]) * datum) + 1.0) / (2 * sum([val * val for val in datum.values()]))
                 tau = min(c, tau)
 
                 delta = datum.copy()
